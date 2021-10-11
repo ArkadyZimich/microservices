@@ -1,0 +1,35 @@
+{
+    "variables": {
+        "project_id": "",
+        "source_image_family": "",
+        "machine_type": "n1-standart-1",
+        "image_description": "VM with pre-installed docker",
+	"tags": "docker",
+	"network": "default",
+	"disk_type": "pd-standard",
+	"disk_size": "20"
+    },
+    "builders": [
+        {
+            "type": "googlecompute",
+            "project_id": "{{user `project_id`}}",
+            "image_name": "docker-base-{{timestamp}}",
+            "image_family": "docker-base",
+            "source_image_family": "{{user `source_image_family`}}",
+            "zone": "europe-west1-b",
+            "ssh_username": "ArkadyZimich",
+            "machine_type": "{{user `machine_type`}}",
+            "image_description": "{{user `image_description`}}",
+            "tags": "{{user `tags`}}",
+            "disk_size": "{{user `disk_size`}}",
+            "disk_type": "{{user `disk_type`}}",
+            "network": "{{user `network`}}"
+        }
+    ],
+    "provisioners": [
+        {
+            "type": "ansible",
+            "playbook_file": "ansible/playbooks/docker.yml"
+         }     
+    ]
+}

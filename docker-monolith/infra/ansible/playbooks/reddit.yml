@@ -1,0 +1,17 @@
+---
+- name: Start app
+  hosts: all
+  become: true
+  vars:
+    CONTAINER_NAME: 'arkadyzimich/otus-reddit:1.0'
+    ansible_python_interpreter: /usr/bin/python3
+
+  tasks:
+    - name: Create container from image
+      docker_container:
+        name: reddit
+        image: "{{ CONTAINER_NAME }}"
+        state: started
+        ports:
+          - "9292:9292"
+          - "80:80"
