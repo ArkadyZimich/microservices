@@ -4,7 +4,7 @@ provider "google" {
   region  = "${var.region}"
 }
 resource "google_compute_instance" "app" {
-  count = 3
+  count = 1
   name         = "docker-host${count.index}"
   machine_type = "g1-small"
   zone         = "${var.zone}"
@@ -18,9 +18,8 @@ resource "google_compute_instance" "app" {
 
   network_interface {
     network = "default"
-
     access_config {
-      nat_ip = "${google_compute_address.app_ip.address}"
+      nat_ip = google_compute_address.app_ip.address
     }
   }
   metadata = {
