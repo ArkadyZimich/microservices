@@ -1,15 +1,11 @@
-FROM alpine:3.6
+FROM ruby:2.2-alpine
 
-RUN apk update && apk upgrade && apk --update add \
-    ruby ruby-dev ruby-json build-base tzdata && gem install bundler --no-ri --no-rdoc \
-    && rm -rf /var/cache/apk/*
+WORKDIR /app
+COPY . ./
 
-ENV APP_HOME /app
-RUN mkdir $APP_HOME
-WORKDIR $APP_HOME
-ADD Gemfile* $APP_HOME/
-RUN bundle install
-ADD . $APP_HOME
+RUN apk --no-cache --update add build-base=0.4-r1 && \
+    bundle install && \
+    apk del build-base
 
 ENV POST_SERVICE_HOST post
 ENV POST_SERVICE_PORT 5000
