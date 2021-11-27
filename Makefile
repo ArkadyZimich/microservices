@@ -2,24 +2,25 @@
 USER_NAME ?= arkadyzimich
 VERSION ?= latest
 
-.PHONY: build-all build-comment build-post build-ui build-prometheus build-blackbox-exporter push-ui push-comment push-post push-prometheus push-blackbox-exporter push-all start stop
+.PHONY: build-all build-comment build-post build-ui build-prometheus build-cloudprober push-ui push-comment push-post push-prometheus push-blackbox-exporter push-all start stop
 
-build-all: build-comment build-post build-ui build-prometheus build-blackbox-exporter
+build-all: build-comment build-post build-ui build-prometheus build-cloudprober
 
 build-comment:
-	@cd $(PWD)/src/comment/ && bash docker_build.sh
+	cd src/comment/ && bash docker_build.sh
 
 build-post:
-	@cd $(PWD)/src/post-py/ && bash docker_build.sh
+	cd src/post-py/ && bash docker_build.sh
 
 build-ui:
-	@cd $(PWD)/src/ui/ && bash docker_build.sh
+	cd src/ui/ && bash docker_build.sh
 
 build-prometheus:
-	@cd $(PWD)/monitoring/prometheus/ && docker build -t $(USER_NAME)/prometheus .
+	cd monitoring/prometheus/ && docker build -t $(USER_NAME)/prometheus .
 
 build-cloudprober:
-	@cd $(PWD)/monitoring/cloudprober/ && docker build -t $(USER_NAME)/cloudprober .
+	cd monitoring/cloudprober/ && docker build -t $(USER_NAME)/cloudprober .
+
 
 push-ui:
 	docker push $(USER_NAME)/ui:$(VERSION)

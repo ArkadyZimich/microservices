@@ -5,6 +5,8 @@ services:
   post_db:
     container_name: infra-post-db
     image: mongo:3.2
+    environment:
+      - ZIPKIN_ENABLED=${ZIPKIN_ENABLED}
     volumes:
       - post_db:/data/db
     networks:
@@ -16,77 +18,54 @@ services:
   ui:
     container_name: infra-ui
     image: ${USERNAME}/ui
+    environment:
+      - ZIPKIN_ENABLED=${ZIPKIN_ENABLED}
     ports:
       - 9292:9292/tcp
-    networks:
-      - front_net
     depends_on:
       - post
       - comment
+    logging:
+      driver: "fluentd"
+      options:
+        fluentd-address: localhost:24224
+        tag: service.ui
+    networks:
+      - front_net
 
   post:
     container_name: infra-post
-    image: ${USERNAME}/post
+    image: ${USER_NAME}/post
+    environment:
+      - POST_DATABASE_HOST=post_db
+      - POST_DATABASE=posts
+      - ZIPKIN_ENABLED=${ZIPKIN_ENABLED}
+    depends_on:
+      - post_db
+    ports:
+      - "5000:5000"
+    logging:
+      driver: "fluentd"
+      options:
+        fluentd-address: localhost:24224
+        tag: service.post
     networks:
       - back_net
       - front_net
-    depends_on:
-      - post_db
         
   comment:
     container_name: infra-comment
     image: ${USERNAME}/comment
+    environment:
+      - ZIPKIN_ENABLED=${ZIPKIN_ENABLED}
     networks:
       - back_net
       - front_net
     depends_on:
       - post_db
    
-  prometheus:
-    image: ${USERNAME}/prometheus
-    ports:
-      - '9090:9090'
-    volumes:
-      - prometheus_data:/prometheus
-    command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--storage.tsdb.path=/prometheus'
-      - '--storage.tsdb.retention=1d'
-    networks:
-      - back_net
-      - front_net
-  
-  node-exporter:
-    image: prom/node-exporter:v0.15.2
-    user: root
-    volumes:
-      - /proc:/host/proc:ro
-      - /sys:/host/sys:ro
-      - /:/rootfs:ro
-    command:
-      - '--path.procfs=/host/proc'
-      - '--path.sysfs=/host/sys'
-      - '--collector.filesystem.ignored-mount-points="^/(sys|proc|dev|host|etc)($$|/)"'
-    networks:
-      - back_net
-      - front_net
-
-  mongodb-exporter:
-    image: eses/mongodb_exporter:latest
-    command: ["-mongodb.uri", "post_db"]
-    networks:
-      - back_net
-      - front_net
-
-  cloudprober:
-    image: cloudprober/cloudprober
-    networks:
-      - back_net
-      - front_net
-
 volumes:
   post_db:
-  prometheus_data:
 
 networks:
   back_net:
